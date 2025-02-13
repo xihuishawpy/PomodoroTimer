@@ -20,5 +20,9 @@
   "options_page": "options.html",
   "background": {
     "service_worker": "background.js"
-  }
+  },
+  "web_accessible_resources": [{
+    "resources": ["notification.mp3"],
+    "matches": ["<all_urls>"]
+  }]
 }

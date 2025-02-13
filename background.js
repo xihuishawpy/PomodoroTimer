@@ -3,12 +3,8 @@ let workTime = 25; // 默认工作时间25分钟
 let shortBreakTime = 5; // 默认短休息时间5分钟
 let longBreakTime = 15; // 默认长休息时间15分钟
 let longBreakInterval = 4; // 默认每4个番茄周期进行一次长休息
-let timeLeft = 0;
-let isWorking = true;
-let isPaused = false;
-let pomodoroCount = 0; // 番茄计数
 
-// 添加状态管理对象
+// 统一使用 timerState 管理所有状态
 let timerState = {
     timeLeft: 0,
     isWorking: true,
@@ -54,62 +50,73 @@ function updateDisplay() {
 }
 
 function startTimer() {
-    if (timerState.isPaused) {
-        timerState.isPaused = false;
-    } else {
-        if (timerState.isWorking) {
-            timerState.timeLeft = workTime * 60;
+    // 在开始计时前先获取最新设置
+    chrome.storage.sync.get({
+        workTime: 25,
+        shortBreakTime: 5,
+        longBreakTime: 15,
+        longBreakInterval: 4
+    }, (items) => {
+        workTime = items.workTime;
+        shortBreakTime = items.shortBreakTime;
+        longBreakTime = items.longBreakTime;
+        longBreakInterval = items.longBreakInterval;
+
+        if (timerState.isPaused) {
+            timerState.isPaused = false;
         } else {
-            timerState.pomodoroCount++;
-            if (timerState.pomodoroCount % longBreakInterval === 0) {
-                timerState.timeLeft = longBreakTime * 60;
+            if (timerState.isWorking) {
+                timerState.timeLeft = workTime * 60;
             } else {
-                timerState.timeLeft = shortBreakTime * 60;
-            }
-        }
-    }
-
-    // 保存当前状态
-    saveState();
-
-    timerInterval = setInterval(() => {
-        if (!timerState.isPaused) {
-            timerState.timeLeft--;
-            updateDisplay();
-            
-            if (timerState.timeLeft <= 0) {
-                clearInterval(timerInterval);
-                
-                // 播放提示音
-                const audio = new Audio('notification.mp3');
-                audio.play();
-                
-                // 发送通知
-                chrome.notifications.create({
-                    type: 'basic',
-                    iconUrl: 'icon128.png',
-                    title: chrome.i18n.getMessage("appName"),
-                    message: timerState.isWorking ? 
-                        chrome.i18n.getMessage("workTimeEnd") : 
-                        chrome.i18n.getMessage("breakTimeEnd")
-                });
-
-                timerState.isWorking = !timerState.isWorking;
-                saveState();
-                
-                if(timerState.isWorking) {
-                    startTimer();
+                timerState.pomodoroCount++;
+                if (timerState.pomodoroCount % longBreakInterval === 0) {
+                    timerState.timeLeft = longBreakTime * 60;
                 } else {
-                    if (timerState.pomodoroCount % longBreakInterval === 0) {
-                        timerState.timeLeft = longBreakTime * 60;
-                    } else {
-                        timerState.timeLeft = shortBreakTime * 60;
-                    }
-                    startTimer();
+                    timerState.timeLeft = shortBreakTime * 60;
                 }
             }
         }
-    }, 1000);
+
+        // 保存当前状态
+        saveState();
+
+        timerInterval = setInterval(() => {
+            if (!timerState.isPaused) {
+                timerState.timeLeft--;
+                updateDisplay();
+                
+                if (timerState.timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    
+                    // 获取声音设置并播放提示音
+                    chrome.storage.sync.get({
+                        soundEnabled: true,
+                        notificationVolume: 50
+                    }, (items) => {
+                        if (items.soundEnabled) {
+                            const audio = new Audio('notification.mp3');
+                            audio.volume = items.notificationVolume / 100;
+                            audio.play();
+                        }
+                    });
+                    
+                    // 发送通知
+                    chrome.notifications.create({
+                        type: 'basic',
+                        iconUrl: 'icon128.png',
+                        title: chrome.i18n.getMessage("appName"),
+                        message: timerState.isWorking ? 
+                            chrome.i18n.getMessage("workTimeEnd") : 
+                            chrome.i18n.getMessage("breakTimeEnd")
+                    });
+
+                    timerState.isWorking = !timerState.isWorking;
+                    saveState();
+                    startTimer(); // 直接调用 startTimer 开始下一个周期
+                }
+            }
+        }, 1000);
+    });
 }
 
 function pauseTimer() {
@@ -121,14 +128,29 @@ function pauseTimer() {
 
 function resetTimer() {
     clearInterval(timerInterval);
-    timerState = {
-        timeLeft: workTime * 60,
-        isWorking: true,
-        isPaused: false,
-        pomodoroCount: 0
-    };
-    updateDisplay();
-    saveState();
+    
+    // 重置时也获取最新设置
+    chrome.storage.sync.get({
+        workTime: 25,
+        shortBreakTime: 5,
+        longBreakTime: 15,
+        longBreakInterval: 4
+    }, (items) => {
+        workTime = items.workTime;
+        shortBreakTime = items.shortBreakTime;
+        longBreakTime = items.longBreakTime;
+        longBreakInterval = items.longBreakInterval;
+
+        timerState = {
+            timeLeft: items.workTime * 60,
+            isWorking: true,
+            isPaused: false,
+            pomodoroCount: 0
+        };
+        
+        updateDisplay();
+        saveState();
+    });
 }
 
 // 保存状态到storage

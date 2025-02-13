@@ -22,6 +22,14 @@
     <input type="number" id="longBreakTime" min="1" max="60" value="15">
     <span>分钟</span>
   </div>
+  <div>
+    <label for="soundEnabled">启用提示音:</label>
+    <input type="checkbox" id="soundEnabled" checked>
+  </div>
+  <div>
+    <label for="notificationVolume">提示音音量:</label>
+    <input type="range" id="notificationVolume" min="0" max="100" value="50">
+  </div>
   <button id="save">保存</button>
   <button id="resetSettings">重置为默认设置</button>
   <script src="options.js"></script>
