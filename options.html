@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>番茄时钟设置</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>番茄时钟设置</h1>
+  <div>
+    <label for="workTime">工作时间:</label>
+    <input type="number" id="workTime" min="1" max="60" value="25">
+    <span>分钟</span>
+  </div>
+  <div>
+    <label for="shortBreakTime">短休息时间:</label>
+    <input type="number" id="shortBreakTime" min="1" max="60" value="5">
+    <span>分钟</span>
+  </div>
+  <div>
+    <label for="longBreakTime">长休息时间:</label>
+    <input type="number" id="longBreakTime" min="1" max="60" value="15">
+    <span>分钟</span>
+  </div>
+  <button id="save">保存</button>
+  <button id="resetSettings">重置为默认设置</button>
+  <script src="options.js"></script>
+</body>
+</html>

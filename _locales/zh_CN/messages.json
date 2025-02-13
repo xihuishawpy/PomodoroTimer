@@ -1,0 +1,38 @@
+{
+  "appName": {
+    "message": "番茄时钟",
+    "description": "插件名称"
+  },
+  "appDesc": {
+    "message": "一个简单的番茄时钟Chrome插件",
+    "description": "插件描述"
+  },
+  "work": {
+    "message": "工作",
+    "description": "工作状态"
+  },
+  "break": {
+    "message": "休息",
+    "description": "休息状态"
+  },
+  "workTimeEnd": {
+    "message": "工作时间结束,开始休息!",
+    "description": "工作时间结束通知"
+  },
+  "breakTimeEnd": {
+    "message": "休息时间结束,开始工作!",
+    "description": "休息时间结束通知"
+  },
+  "start": {
+    "message": "开始",
+    "description": "开始按钮文字"
+  },
+  "pause": {
+    "message": "暂停",
+    "description": "暂停按钮文字"
+  },
+  "reset": {
+    "message": "重置",
+    "description": "重置按钮文字"
+  }
+}
